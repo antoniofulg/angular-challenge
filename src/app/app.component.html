@@ -13,10 +13,47 @@
           </ng-container>
           <ng-template #elseTemplate>
             <ng-container *ngIf="evaluations.length; else elseTemplate">
-              <div class="row pb-3">
+              <div class="row">
                 <div class="col-4"></div>
                 <div class="col-4"></div>
-                <div class="col-4 text-right">
+                <div class="col-4">
+                  <nav class="d-inline">
+                    <ul class="pagination justify-content-center">
+                      <li
+                        class="page-item"
+                        [ngClass]="{'active': paginationInfo.itemsPerPage === 10}"
+                      >
+                        <button
+                          class="page-link"
+                          (click)="setItemsPerPage(10)"
+                        >
+                          10
+                        </button>
+                      </li>
+                      <li
+                        class="page-item"
+                        [ngClass]="{'active': paginationInfo.itemsPerPage === 15}"
+                      >
+                        <button
+                          class="page-link"
+                          (click)="setItemsPerPage(15)"
+                        >
+                          15
+                        </button>
+                      </li>
+                      <li
+                        class="page-item"
+                        [ngClass]="{'active': paginationInfo.itemsPerPage === 20}"
+                      >
+                        <button
+                          class="page-link"
+                          (click)="setItemsPerPage(20)"
+                        >
+                          20
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
                 </div>
               </div>
               <table class="table table-bordered table-striped">
@@ -26,23 +63,46 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let eva of pageEvaluations">
+                  <tr *ngFor="let eva of pageEvaluations; let i = index">
                     <th scope="row">{{ eva.id }}</th>
-                    <td>{{ eva.name }}</td>
+                    <td>{{ i }} - {{ eva.name }}</td>
                   </tr>
                 </tbody>
               </table>
-              <div class="d-flex justify-content-center">
-                <nav>
-                  <ul class="pagination">
-                    <li class="page-item">
-                      <button class="page-link" (click)="previousPage()">Página anterior</button>
-                    </li>
-                    <li class="page-item">
-                      <button class="page-link" (click)="nextPage()">Próxima página</button>
-                    </li>
-                  </ul>
-                </nav>
+              <div class="row">
+                <div class="col-8 offset-2">
+                  <nav>
+                    <ul class="pagination justify-content-center">
+                      <li
+                        class="page-item"
+                        [ngClass]="{'disabled': paginationInfo.currentPage === 1}"
+                      >
+                        <button
+                          class="page-link disabled"
+                          [disabled]="paginationInfo.currentPage === 1"
+                          (click)="previousPage()"
+                        >
+                          Página anterior
+                        </button>
+                      </li>
+                      <li
+                        class="page-item"
+                        [ngClass]="{'disabled': paginationInfo.currentPage === paginationInfo.totalPages}"
+                      >
+                        <button
+                          class="page-link"
+                          [disabled]="paginationInfo.currentPage === paginationInfo.totalPages"
+                          (click)="nextPage()"
+                        >
+                          Próxima página
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+                <div class="pt-1 col-2">
+                  Pagina {{ paginationInfo.currentPage }} de {{ paginationInfo.totalPages }}
+                </div>
               </div>
             </ng-container>
             <ng-template #elseTemplate>

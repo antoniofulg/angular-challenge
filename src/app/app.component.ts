@@ -23,11 +23,11 @@ interface Evaluation {
 export class AppComponent {
   private axiosClient: AxiosInstance
 
-  loading:boolean = false
-  headers:Array<string> = ['ID', 'Nome']
-  evaluations:Array<Evaluation> = []
-  pageEvaluations:Array<Evaluation> = []
-  paginationInfo: Pagination = {
+  public loading:boolean = false
+  public headers:Array<string> = ['ID', 'Nome']
+  public evaluations:Array<Evaluation> = []
+  public pageEvaluations:Array<Evaluation> = []
+  public paginationInfo: Pagination = {
     totalItems: 0,
     itemsPerPage: 0,
     totalPages: 0,
@@ -50,7 +50,8 @@ export class AppComponent {
       this.loading = true
       const { getEvaluationsInfo } = (await this.axiosClient.get('https://simulados.evolucional.com.br/painel/json/get-evaluations-without-questions')).data
       this.evaluations = getEvaluationsInfo
-      this.getEvaluationsPaginationInfo(15, 2)
+      console.log(this.evaluations)
+      this.getEvaluationsPaginationInfo(15, 1)
       this.loading = false
     } catch (error) {
       this.loading = false
@@ -58,18 +59,28 @@ export class AppComponent {
     }
   }
 
-  private nextPage() {
+  public setItemsPerPage(itemsPerPage: number) {
+    let currentPage = this.paginationInfo.currentPage
+    const totalPages = this.evaluations.length / itemsPerPage
+    if (currentPage > totalPages) 
+      currentPage = totalPages
+    this.getEvaluationsPaginationInfo(itemsPerPage, currentPage)
+  }
+
+  public nextPage() {
     this.getEvaluationsPaginationInfo(this.paginationInfo.itemsPerPage, this.paginationInfo.currentPage + 1)
   }
 
-  private previousPage() {
+  public previousPage() {
     this.getEvaluationsPaginationInfo(this.paginationInfo.itemsPerPage, this.paginationInfo.currentPage - 1)
   }
 
   private getEvaluationsPaginationInfo(itemsPerPage:number = 15, currentPage:number = 1) {
     this.paginationInfo.itemsPerPage = itemsPerPage
     this.paginationInfo.currentPage = currentPage
-    this.paginationInfo.indexOfFirstItem = this.paginationInfo.currentPage * this.paginationInfo.itemsPerPage - 1
+    this.paginationInfo.indexOfFirstItem = (
+      (this.paginationInfo.currentPage - 1) * this.paginationInfo.itemsPerPage
+    )
     this.paginationInfo.totalItems = this.evaluations.length
     this.paginationInfo.totalPages = this.evaluations.length / this.paginationInfo.itemsPerPage
     this.pageEvaluations = this.evaluations.slice(
