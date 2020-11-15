@@ -7,7 +7,8 @@ interface Pagination {
   itemsPerPage: number,
   totalPages: number,
   currentPage: number,
-  indexOfFirstItem: number
+  indexOfFirstItem: number,
+  availablePages: Array<number>
 }
 
 interface Evaluation {
@@ -42,7 +43,8 @@ export class AppComponent {
     itemsPerPage: 0,
     totalPages: 0,
     currentPage: 1,
-    indexOfFirstItem: 0
+    indexOfFirstItem: 0,
+    availablePages: []
   }
   public showRepeatedEvaluationsOnList:Boolean = false
 
@@ -61,7 +63,6 @@ export class AppComponent {
       this.loading = true
       const { getEvaluationsInfo } = (await this.axiosClient.get('https://simulados.evolucional.com.br/painel/json/get-evaluations-without-questions')).data
       this.allEvaluationsList = getEvaluationsInfo
-      console.log(this.allEvaluationsList)
       this.getNonRepeatedEvaluation()
       this.switchEvaluationShowList()
       this.getEvaluationsPaginationInfo(15, 1)
@@ -88,6 +89,32 @@ export class AppComponent {
     this.getEvaluationsPaginationInfo(this.paginationInfo.itemsPerPage, this.paginationInfo.currentPage - 1)
   }
 
+  public goToPage(pageNumber:number) {
+    this.getEvaluationsPaginationInfo(this.paginationInfo.itemsPerPage, pageNumber)
+  }
+
+  private getAvailablePages() {
+    this.paginationInfo.availablePages = []
+    let firstPage = 0
+    let lastPage = 0
+    const finalDiff = this.paginationInfo.totalPages - this.paginationInfo.currentPage
+    if (this.paginationInfo.currentPage > 3) {
+      if (finalDiff > 3) {
+        firstPage = this.paginationInfo.currentPage - 3
+        lastPage = this.paginationInfo.currentPage + 3
+      } else {
+        firstPage = this.paginationInfo.currentPage - (3 + (3 - finalDiff))
+        lastPage = this.paginationInfo.currentPage + finalDiff
+      }
+    } else {
+      firstPage = 1
+      lastPage = 7
+    }
+    for (let i = firstPage; i <= lastPage; i++) {
+      this.paginationInfo.availablePages.push(i)
+    }
+  }
+
   private getEvaluationsPaginationInfo(itemsPerPage:number = 15, currentPage:number = 1) {
     this.paginationInfo.itemsPerPage = itemsPerPage
     this.paginationInfo.currentPage = currentPage
@@ -100,7 +127,7 @@ export class AppComponent {
       this.paginationInfo.indexOfFirstItem,
       this.paginationInfo.indexOfFirstItem + this.paginationInfo.itemsPerPage
     )
-    console.log(this.paginationInfo)
+    this.getAvailablePages()
   }
 
   private getNonRepeatedEvaluation() {
@@ -122,7 +149,6 @@ export class AppComponent {
         })
       }
     })
-    console.log(this.nonRepeatedEvaluationList)
     this.getMostRepeatedEvaluation()
   }
 
@@ -145,6 +171,6 @@ export class AppComponent {
     } else {
       this.evaluationsList = this.nonRepeatedEvaluationList
     }
-    this.getEvaluationsPaginationInfo()
+    this.getEvaluationsPaginationInfo(this.paginationInfo.itemsPerPage)
   }
 }

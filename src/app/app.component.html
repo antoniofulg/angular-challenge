@@ -123,6 +123,19 @@
                         </button>
                       </li>
                       <li
+                        *ngFor="let page of paginationInfo.availablePages"
+                        class="page-item"
+                        [ngClass]="{'disabled': paginationInfo.currentPage === page}"
+                      >
+                        <button
+                          class="page-link"
+                          [disabled]="paginationInfo.currentPage === page"
+                          (click)="goToPage(page)"
+                        >
+                          {{ page }}
+                        </button>
+                      </li>
+                      <li
                         class="page-item"
                         [ngClass]="{'disabled': paginationInfo.currentPage === paginationInfo.totalPages}"
                       >
