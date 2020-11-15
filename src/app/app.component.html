@@ -165,4 +165,24 @@
       </div>
     </div>
   </div>
+  <div class="card">
+    <div class="card-header">
+      <h1 class="text-center">Últimas 5 avaliações que não se repetem</h1>
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th *ngFor="let column of headers" scope="col">{{ column }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let eva of lastFiveNonRepeatedEvaluationList">
+            <th scope="row">{{ eva.id }}</th>
+            <td>{{ eva.name }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

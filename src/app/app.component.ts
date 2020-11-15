@@ -33,7 +33,8 @@ export class AppComponent {
 
   public allEvaluationsList:Array<Evaluation> = []
   public evaluationsList:Array<Evaluation> = []
-  public headers:Array<string> = ['ID', 'Nome']
+  public headers: Array<string> = ['ID', 'Nome']
+  public lastFiveNonRepeatedEvaluationList:Array<EvaluationCounter> = []
   public loading:boolean = false
   public mostRepeatedEvaluation:EvaluationCounter
   public nonRepeatedEvaluationList:Array<any> = []
@@ -149,6 +150,7 @@ export class AppComponent {
         })
       }
     })
+    this.lastFiveNonRepeatedEvaluationList = this.nonRepeatedEvaluationList.slice(-5)
     this.getMostRepeatedEvaluation()
   }
 
