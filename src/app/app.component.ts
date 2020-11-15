@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ControlContainer } from '@angular/forms';
 import axios, { AxiosInstance } from 'axios';
 
 interface Pagination {
@@ -17,7 +18,7 @@ interface Evaluation {
 interface EvaluationCounter {
   id: number,
   name: string,
-  count: number
+  counter: number
 }
 
 @Component({
@@ -29,9 +30,12 @@ interface EvaluationCounter {
 export class AppComponent {
   private axiosClient: AxiosInstance
 
-  public evaluations:Array<Evaluation> = []
+  public allEvaluationsList:Array<Evaluation> = []
+  public evaluationsList:Array<Evaluation> = []
   public headers:Array<string> = ['ID', 'Nome']
   public loading:boolean = false
+  public mostRepeatedEvaluation:EvaluationCounter
+  public nonRepeatedEvaluationList:Array<any> = []
   public pageEvaluations:Array<Evaluation> = []
   public paginationInfo: Pagination = {
     totalItems: 0,
@@ -40,8 +44,7 @@ export class AppComponent {
     currentPage: 1,
     indexOfFirstItem: 0
   }
-  public mostRepeatedEvaluation: Evaluation
-  public nonRepeatedEvaluationList:Array<any> = []
+  public showRepeatedEvaluationsOnList:Boolean = false
 
   constructor() {
     this.axiosClient = axios.create({
@@ -57,10 +60,11 @@ export class AppComponent {
     try {
       this.loading = true
       const { getEvaluationsInfo } = (await this.axiosClient.get('https://simulados.evolucional.com.br/painel/json/get-evaluations-without-questions')).data
-      this.evaluations = getEvaluationsInfo
-      console.log(this.evaluations)
-      this.getEvaluationsPaginationInfo(15, 1)
+      this.allEvaluationsList = getEvaluationsInfo
+      console.log(this.allEvaluationsList)
       this.getNonRepeatedEvaluation()
+      this.switchEvaluationShowList()
+      this.getEvaluationsPaginationInfo(15, 1)
       this.loading = false
     } catch (error) {
       this.loading = false
@@ -70,7 +74,7 @@ export class AppComponent {
 
   public setItemsPerPage(itemsPerPage: number) {
     let currentPage = this.paginationInfo.currentPage
-    const totalPages = this.evaluations.length / itemsPerPage
+    const totalPages = this.allEvaluationsList.length / itemsPerPage
     if (currentPage > totalPages) 
       currentPage = totalPages
     this.getEvaluationsPaginationInfo(itemsPerPage, currentPage)
@@ -90,9 +94,9 @@ export class AppComponent {
     this.paginationInfo.indexOfFirstItem = (
       (this.paginationInfo.currentPage - 1) * this.paginationInfo.itemsPerPage
     )
-    this.paginationInfo.totalItems = this.evaluations.length
-    this.paginationInfo.totalPages = this.evaluations.length / this.paginationInfo.itemsPerPage
-    this.pageEvaluations = this.evaluations.slice(
+    this.paginationInfo.totalItems = this.evaluationsList.length
+    this.paginationInfo.totalPages = Math.ceil(this.evaluationsList.length / this.paginationInfo.itemsPerPage)
+    this.pageEvaluations = this.evaluationsList.slice(
       this.paginationInfo.indexOfFirstItem,
       this.paginationInfo.indexOfFirstItem + this.paginationInfo.itemsPerPage
     )
@@ -100,7 +104,7 @@ export class AppComponent {
   }
 
   private getNonRepeatedEvaluation() {
-    this.evaluations.map((evaluation) => {
+    this.allEvaluationsList.map((evaluation) => {
       let indexOfEvaluation: number = -1
       if (this.nonRepeatedEvaluationList.length) {
         this.nonRepeatedEvaluationList.map((item: { id: number; name: string; counter: number }, index:number) => {
@@ -123,6 +127,24 @@ export class AppComponent {
   }
 
   private getMostRepeatedEvaluation() {
-    
+    let controlEvaluation: EvaluationCounter
+    this.nonRepeatedEvaluationList.map(evaluation => {
+      if (!(controlEvaluation?.counter > evaluation.counter)) {
+        controlEvaluation = evaluation
+      }
+    })
+    this.mostRepeatedEvaluation = controlEvaluation
+  }
+
+  public switchEvaluationShowList(switcher: Boolean = false) {
+    if (switcher) {
+      this.showRepeatedEvaluationsOnList = !this.showRepeatedEvaluationsOnList
+    }
+    if (this.showRepeatedEvaluationsOnList) {
+      this.evaluationsList = this.allEvaluationsList
+    } else {
+      this.evaluationsList = this.nonRepeatedEvaluationList
+    }
+    this.getEvaluationsPaginationInfo()
   }
 }

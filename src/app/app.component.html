@@ -3,16 +3,18 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <h1 class="text-center">Lista de avaliações <span *ngIf="evaluations.length" class="badge badge-primary">{{evaluations.length}}</span></h1>
+          <h1 class="text-center">Lista de avaliações <span *ngIf="evaluationsList.length" class="badge badge-primary">{{evaluationsList.length}}</span></h1>
         </div>
         <div class="card-body">
           <ng-container *ngIf="loading; else elseTemplate">
-            <div class="spinner-border" role="status">
-              <span class="sr-only">Loading</span>
+            <div class="d-flex justify-content-center">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading</span>
+              </div>
             </div>
           </ng-container>
           <ng-template #elseTemplate>
-            <ng-container *ngIf="evaluations.length; else elseTemplate">
+            <ng-container *ngIf="evaluationsList.length; else elseTemplate">
               <div class="row">
                 <div class="col-4">
                   <p class="h5">Ítens por página:</p>
@@ -54,6 +56,42 @@
                     </ul>
                   </nav>
                 </div>
+                <div class="col-4">
+                  <p class="h5">Mostrar avaliações repetidas:</p>
+                  <nav>
+                    <ul class="pagination justify-content-start">
+                      <li
+                        class="page-item"
+                        [ngClass]="{'active': showRepeatedEvaluationsOnList}"
+                      >
+                        <button
+                          class="page-link"
+                          (click)="switchEvaluationShowList(true)"
+                        >
+                          Sim
+                        </button>
+                      </li>
+                      <li
+                        class="page-item"
+                        [ngClass]="{'active': !showRepeatedEvaluationsOnList}"
+                      >
+                        <button
+                          class="page-link"
+                          (click)="switchEvaluationShowList(true)"
+                        >
+                          Não
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+                <div *ngIf="mostRepeatedEvaluation" class="col-4">
+                  <p class="h5">Avaliação mais vezes repetida:</p>
+                  <p class="h4 text-left">
+                    {{ mostRepeatedEvaluation.id }}: {{ mostRepeatedEvaluation.name }}
+                    <span  class="badge badge-primary">{{ mostRepeatedEvaluation.counter }} vezes</span>
+                  </p>
+                </div>
               </div>
               <table class="table table-bordered table-striped">
                 <thead>
@@ -62,9 +100,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let eva of pageEvaluations; let i = index">
+                  <tr *ngFor="let eva of pageEvaluations">
                     <th scope="row">{{ eva.id }}</th>
-                    <td>{{ i }} - {{ eva.name }}</td>
+                    <td>{{ eva.name }}</td>
                   </tr>
                 </tbody>
               </table>
