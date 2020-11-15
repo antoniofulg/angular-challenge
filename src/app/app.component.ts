@@ -14,6 +14,12 @@ interface Evaluation {
   name: string
 }
 
+interface EvaluationCounter {
+  id: number,
+  name: string,
+  count: number
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -23,9 +29,9 @@ interface Evaluation {
 export class AppComponent {
   private axiosClient: AxiosInstance
 
-  public loading:boolean = false
-  public headers:Array<string> = ['ID', 'Nome']
   public evaluations:Array<Evaluation> = []
+  public headers:Array<string> = ['ID', 'Nome']
+  public loading:boolean = false
   public pageEvaluations:Array<Evaluation> = []
   public paginationInfo: Pagination = {
     totalItems: 0,
@@ -34,6 +40,8 @@ export class AppComponent {
     currentPage: 1,
     indexOfFirstItem: 0
   }
+  public mostRepeatedEvaluation: Evaluation
+  public nonRepeatedEvaluationList:Array<any> = []
 
   constructor() {
     this.axiosClient = axios.create({
@@ -52,6 +60,7 @@ export class AppComponent {
       this.evaluations = getEvaluationsInfo
       console.log(this.evaluations)
       this.getEvaluationsPaginationInfo(15, 1)
+      this.getNonRepeatedEvaluation()
       this.loading = false
     } catch (error) {
       this.loading = false
@@ -88,5 +97,32 @@ export class AppComponent {
       this.paginationInfo.indexOfFirstItem + this.paginationInfo.itemsPerPage
     )
     console.log(this.paginationInfo)
+  }
+
+  private getNonRepeatedEvaluation() {
+    this.evaluations.map((evaluation) => {
+      let indexOfEvaluation: number = -1
+      if (this.nonRepeatedEvaluationList.length) {
+        this.nonRepeatedEvaluationList.map((item: { id: number; name: string; counter: number }, index:number) => {
+          if (item.name === evaluation.name) {
+            indexOfEvaluation = index
+          }
+        })
+      }
+      if (indexOfEvaluation > -1) {
+        this.nonRepeatedEvaluationList[indexOfEvaluation].counter++
+      } else {
+        this.nonRepeatedEvaluationList.push({
+          ...evaluation,
+          counter: 1
+        })
+      }
+    })
+    console.log(this.nonRepeatedEvaluationList)
+    this.getMostRepeatedEvaluation()
+  }
+
+  private getMostRepeatedEvaluation() {
+    
   }
 }
